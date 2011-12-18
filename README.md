@@ -30,4 +30,4 @@ I also had to add an include in NoteStore_types.js and UserStore_types.js to req
 
 ## Examples
 
-Examples of using the Evernote(TM) API can be found in the [examples](https://github.com/flyingninjasquirrel/evernode/tree/master/examples) folder.
+Examples of using the Evernote(TM) API can be found in the [examples](https://github.com/cloudsnap/evernode/tree/master/examples) folder.
