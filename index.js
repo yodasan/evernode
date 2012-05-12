@@ -1,3 +1,6 @@
+
+exports.Evernode = require('./evernode');
+
 exports.customConnections = require('./lib/evernode/CustomConnections'),
 exports.UserStore = require('./lib/evernote-thrift/gen-nodejs/UserStore')
 exports.NoteStore = require('./lib/evernote-thrift/gen-nodejs/NoteStore');
