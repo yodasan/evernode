@@ -11,11 +11,13 @@ exports.NoteStoreTypes = NoteStoreTypes;
 exports.Types 	 = Types;
 exports.Evernote = Evernote;
 
-/*
-	@param consumer_key 		{String} - Evernote's API ConsumerKey
-	@param consumer_secret 	{String} - Evernote's API ConsumerSecret
-	@param sandbox {Bool} 
-*/
+/**
+ * Evernote
+ * @param  {String} consumer_key - Evernote's API ConsumerKey
+ * @param  {String} consumer_secret - Evernote's API ConsumerSecret
+ * @param  {Bool} 	sandbox - using sandbox
+ * @constructor
+ */
 function Evernote(consumer_key, consumer_secret, sandbox){
 		
 	if(!consumer_key || !consumer_secret) throw 'Argument Execption';
@@ -29,15 +31,6 @@ function Evernote(consumer_key, consumer_secret, sandbox){
 	this.createUserStore = function () {
 	    var userConnection = CustomConnections.createHTTPSConnection(server, 443, '/edam/user');
 			return thrift.createClient(UserStore, userConnection);
-	}
-	
-	this.getUserInformation = function (authToken, callback){
-
-		this.createUserStore().getUser(authToken, function(err, response) {
-			
-			if(response) response.authToken = authToken;
-			callback(err, response);
-		});
 	}
 	
 	this.oAuth = function(callback_url){
@@ -56,35 +49,46 @@ function Evernote(consumer_key, consumer_secret, sandbox){
 			return "https://sandbox.evernote.com/OAuth.action?oauth_token="+oauthRequestToken;
 		else
 			return "https://www.evernote.com/OAuth.action?oauth_token="+oauthRequestToken;
-	}
-	
+	}	
 }
 
-/*
-	findNotes - Find/List notes
+/**
+ * getUser
+ * @param  { String } authToken
+ * @param  { function (err, EDAMUser) } callback
+ */
+Evernote.prototype.getUser = function (authToken, callback){
 
-	@param userInfo {Object} - User's Infomation with authToken & shardId
-		- Normally, this object should be EDAMUser
-	@param words 	{String} - search words
-	@param option {Object, optional} - fetch option
+	this.createUserStore().getUser(authToken, function(err, response) {
+		
+		if(response) response.authToken = authToken;
+		callback(err, response);
+	});
+}
+
+/**
+ * findNotes
+ * @param  { EdamUser } user
+ * @param  { String }		words
+ * @param  { Option (optional) } option
 		- offset
 		- count
 		- sortOrder
 		- ascending
 		- inactive
-	@param callback { Function(err, syncResult)... }
-*/
-Evernote.prototype.findNotes = function(userInfo, words, option, callback)
+ * @param  { function (err, EDAMUser) } authToken
+ */
+Evernote.prototype.findNotes = function(user, words, option, callback)
 {
 	if(arguments.length < 4){
 		callback = option;
 		option = {};
 	}
 	
-	if(!userInfo || !userInfo.shardId || !userInfo.authToken) throw 'Argument Execption';
-	if(typeof callback != 'function') throw 'Argument Execption';
+	if(!user || !user.shardId || !user.authToken) throw 'Argument Execption';
+	callback = callback || function (){}
 	
-	var noteStore = this.createNoteStore(userInfo.shardId);
+	var noteStore = this.createNoteStore(user.shardId);
 	var noteFilter = new NoteStoreTypes.NoteFilter();
 	
 	noteFilter.words = words || '';
@@ -95,24 +99,22 @@ Evernote.prototype.findNotes = function(userInfo, words, option, callback)
 	var offset = option.offset || 0;
 	var count = option.count || 50;
 	
-	noteStore.findNotes(userInfo.authToken, noteFilter, offset, count, function(err, response) {
+	noteStore.findNotes(user.authToken, noteFilter, offset, count, function(err, response) {
     callback(err, response)
   });
 }
 
-/*
-	getNote - Get note with content.
-	
-	@param userInfo {Object} - User's Infomation with authToken & shardId
-		- Normally, this object should be EDAMUser
-	@param guid {String} - Note's GUID
-	@param option {Object, optional} - fetch option
-		- withContent
-		- withResourcesData
-		- withResourcesRecognition
-		- withResourcesAlternateData
-	@param callback { Function(err, edamNote)... }
-*/
+/**
+ * getNote
+ * @param  { EdamUser } user
+ * @param  { String }		guid
+ * @param  { Option (optional) } option 
+ * 		- withContent
+ * 		- withResourcesData
+ * 		- withResourcesRecognition
+ * 		- withResourcesAlternateData
+ * @param  { function (err, EDAMUser) } authToken
+ */
 Evernote.prototype.getNote = function(userInfo, guid, option, callback)
 {
 	if(arguments.length < 4){
@@ -137,14 +139,12 @@ Evernote.prototype.getNote = function(userInfo, guid, option, callback)
   	});
 }
 
-/*
-	createNote - Create note.
-	
-	@param userInfo {Object} - User's Infomation with authToken & shardId
-		- Normally, this object should be EDAMUser
-	@param note {Object} - note
-	@param callback { Function(err, edamNote)... }
-*/
+/**
+ * createNote
+ * @param  { EdamUser } user
+ * @param  { EdamNote }	note
+ * @param  { function (err, EDAMUser) } authToken
+ */
 Evernote.prototype.createNote = function(userInfo, note, callback){
 	
 	if(!userInfo || !userInfo.shardId || !userInfo.authToken) throw 'Argument Execption';
@@ -166,14 +166,12 @@ Evernote.prototype.createNote = function(userInfo, note, callback){
   });
 }
 
-/*
-	updateNote - Update note.
-	
-	@param userInfo {Object} - User's Infomation with authToken & shardId
-		- Normally, this object should be EDAMUser
-	@param note {Object} - note
-	@param callback { Function(err, edamNote)... }
-*/
+/**
+ * updateNote
+ * @param  { EdamUser } user
+ * @param  { EdamNote }	note
+ * @param  { function (err, EDAMUser) } authToken
+ */
 Evernote.prototype.updateNote = function(userInfo, note, callback){
 	
 	if(!userInfo || !userInfo.shardId || !userInfo.authToken) throw 'Argument Execption';
@@ -196,14 +194,12 @@ Evernote.prototype.updateNote = function(userInfo, note, callback){
   });
 }
 
-/*
-	createNote - Create note.
-	
-	@param userInfo {Object} - User's Infomation with authToken & shardId
-		- Normally, this object should be EDAMUser
-	@param guid {String} - The GUID of the note to delete.
-	@param callback { Function(err, updateSequenceNumber)... }
-*/
+/**
+ * deleteNote
+ * @param  { EdamUser } user
+ * @param  { String }	guid
+ * @param  { function (err, updateSequence) } authToken
+ */
 Evernote.prototype.deleteNote = function(userInfo, guid, callback){
 	
 	if(!userInfo || !userInfo.shardId || !userInfo.authToken) throw 'Argument Execption';
@@ -214,22 +210,17 @@ Evernote.prototype.deleteNote = function(userInfo, guid, callback){
 	noteStore.deleteNote(userInfo.authToken, guid, function(err, response) {
     callback(err, response)
   });
-	
 }
 
-/*
-	getNote - Get note with content.
-	
-	@param userInfo {Object} - User's Infomation with authToken & shardId
-		- Normally, this object should be EDAMUser
-	@param guid {String} - Note's GUID
-	@param option {Object, optional} - fetch option
-		- noteOnly : If true, this will only return the text extracted from the ENML contents of the note itself. 
-			If false, this will also include the extracted text from any text-bearing resources
-		- tokenizeForIndexing : If true, this will break the text into cleanly separated and sanitized tokens. 
-			If false, this will return the more raw text extraction, with its original punctuation, capitalization, spacing, etc.
-	@param callback { Function(err, text)... }
-*/
+/**
+ * getNoteSearchText
+ * @param  { EdamUser } user
+ * @param  { String }		guid
+ * @param  { Option (optional) } option 
+ * 		- noteOnly,
+ * 		- tokenizeForIndexing
+ * @param  { function (err, EDAMUser) } authToken
+ */
 Evernote.prototype.getNoteSearchText = function(userInfo, guid, option, callback)
 {
 	if(arguments.length < 4){
@@ -243,7 +234,7 @@ Evernote.prototype.getNoteSearchText = function(userInfo, guid, option, callback
 	if(typeof callback != 'function') throw 'ArgumentExecption';
 	
 	var noteStore = this.createNoteStore(userInfo.shardId);
-	var noteOnly = option.noteOnly || true;
+	var noteOnly = option.noteOnly || false;
 	var tokenizeForIndexing = option.tokenizeForIndexing || false;
 
 	noteStore.getNoteSearchText(userInfo.authToken, guid, noteOnly, tokenizeForIndexing,
@@ -251,6 +242,57 @@ Evernote.prototype.getNoteSearchText = function(userInfo, guid, option, callback
     	callback(err, response);
   	});
 }
+
+
+
+/**
+ * getFilteredSyncChunk
+ * @param  { EdamUser } user
+ * @param  { Integer }	afterUSN
+ * @param  { Integer }	maxEntries
+ * @param  { Bool }			fullSyncOnly
+ * @param  { function (err, EDAMUser) } authToken
+ */
+Evernote.prototype.getSyncState = function(userInfo, callback)
+{
+	if(!userInfo || !userInfo.shardId || !userInfo.authToken) throw 'ArgumentExecption';
+	if(typeof callback != 'function') throw 'ArgumentExecption';
+	
+	var noteStore = this.createNoteStore(userInfo.shardId);
+
+	noteStore.getSyncState(userInfo.authToken,
+		function(err, response) {
+    	callback(err, response);
+  });
+}
+
+/**
+ * getFilteredSyncChunk
+ * @param  { EdamUser } user
+ * @param  { Integer }	afterUSN
+ * @param  { Integer }	maxEntries
+ * @param  { Bool }			fullSyncOnly
+ * @param  { function (err, EDAMUser) } authToken
+ */
+Evernote.prototype.getSyncChunk = function(userInfo, afterUSN, maxEntries, fullSyncOnly, callback)
+{
+	if(arguments.length < 4){
+		callback = option;
+		option = {};
+	}
+	
+	if(!userInfo || !userInfo.shardId || !userInfo.authToken) throw 'ArgumentExecption';
+	if(typeof callback != 'function') throw 'ArgumentExecption';
+	
+	var noteStore = this.createNoteStore(userInfo.shardId);
+
+	noteStore.getSyncChunk(userInfo.authToken, afterUSN, maxEntries, fullSyncOnly,
+		function(err, response) {
+    	callback(err, response);
+  	});
+}
+
+
 
 
 
