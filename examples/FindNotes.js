@@ -6,34 +6,17 @@
     Note that you must already have an OAuth token for the user. Please replace it below.
  */
 
-var thrift = require('thrift'),
-    customConnections = require('../lib/evernode/CustomConnections'),
-    UserStore = require('../lib/evernote-thrift/gen-nodejs/UserStore'),
-    NoteTypes = require('../lib/evernote-thrift/gen-nodejs/NoteStore_types'),
-    NoteStore = require('../lib/evernote-thrift/gen-nodejs/NoteStore');
+var Evernode = require('../lib/evernode/');
 
-var evernoteServer = "sandbox.evernote.com"; //For production use: www.evernote.com
-var oAuthToken = "XXXXXXXXX"; //OAuth Token of the user
+var evernodeInstance = new Evernode({
+    sandbox: true,
+    oAuthToken: "XXXXXX"
+});
 
-var userConnection = customConnections.createHTTPSConnection(evernoteServer, 443, '/edam/user');
-var userClient = thrift.createClient(UserStore, userConnection);
+var noteFilter = new Evernode.NoteStoreTypes.NoteFilter();
+noteFilter.words = "";
 
-
-//Helper method to build the noteClient for us
-function buildNoteClientForUser(user) {
-    var noteConnection = customConnections.createHTTPSConnection(evernoteServer, 443, '/edam/note/' + user.shardId);
-    return thrift.createClient(NoteStore, noteConnection);
-}
-
-//Get user info and use the information to build the noteClient
-userClient.getUser(oAuthToken, function(err, response) {
-  if (err) {
-    console.error("Error back from API: " + err);
-  } else {
-    var noteClient = buildNoteClientForUser(response);
-    var noteFilter = new NoteTypes.NoteFilter();
-    noteFilter.words = "";
-    noteClient.findNotes(oAuthToken, noteFilter, 0, 10, function(err, response) {
+evernodeInstance.findNotes(noteFilter, 0, 10, function(err, response) {
       if (err) {
         console.error("Error back from API: " + err);
       } else {
@@ -48,9 +31,6 @@ userClient.getUser(oAuthToken, function(err, response) {
             console.log("Note (id=" + singleNote.guid + "): " + JSON.stringify(singleNote));
         }
       }
-    });
-  }
-});
-
-
+    }
+);
 

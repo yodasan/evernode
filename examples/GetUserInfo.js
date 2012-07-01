@@ -5,18 +5,14 @@
     Note that you must already have an OAuth token for the user. Please replace it below.
  */
 
-var thrift = require('thrift'),
-    customConnections = require('../lib/evernode/CustomConnections'),
-    UserStore = require('../lib/evernote-thrift/gen-nodejs/UserStore');
+var Evernode = require('../lib/evernode/');
 
-var evernoteServer = "sandbox.evernote.com"; //For production use: www.evernote.com
-var oAuthToken = "XXXXXX"; //OAuth Token of the user
+var evernodeInstance = new Evernode({
+    sandbox: true,
+    oAuthToken: "XXXXXX"
+});
 
-var userConnection = customConnections.createHTTPSConnection(evernoteServer, 443, '/edam/user');
-var userClient = thrift.createClient(UserStore, userConnection);
-
-
-userClient.getUser(oAuthToken, function(err, response) {
+evernodeInstance.getUser(function(err, response) {
   if (err) {
     console.error("Error back from API: " + err);
   } else {
