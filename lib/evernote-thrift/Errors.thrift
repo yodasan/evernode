@@ -36,7 +36,7 @@ namespace csharp Evernote.EDAM.Error
 namespace py evernote.edam.error
 namespace cpp evernote.edam
 namespace rb Evernote.EDAM.Error
-namespace php edam_error
+namespace php EDAM.Error
 namespace perl EDAMErrors
 
 /**
@@ -67,6 +67,20 @@ namespace perl EDAMErrors
  *     <dd>Content of submitted note was malformed</dd>
  *   <dt>SHARD_UNAVAILABLE</dt>
  *     <dd>Service shard with account data is temporarily down</dd>
+ *   <dt>LEN_TOO_SHORT</dt>
+ *     <dd>Operation denied due to data model limit, where something such
+ *         as a string length was too short</dd>
+ *   <dt>LEN_TOO_LONG</dt>
+ *     <dd>Operation denied due to data model limit, where something such
+ *         as a string length was too long</dd>
+ *   <dt>TOO_FEW</dt>
+ *     <dd>Operation denied due to data model limit, where there were
+ *         too few of something.</dd>
+ *   <dt>TOO_MANY</dt>
+ *     <dd>Operation denied due to data model limit, where there were
+ *         too many of something.</dd>
+ *   <dt>UNSUPPORTED_OPERATION</dt>
+ *     <dd>Operation denied because it is currently unsupported.</dd>
  * </dl>
  */
 enum EDAMErrorCode {
@@ -81,9 +95,13 @@ enum EDAMErrorCode {
   AUTH_EXPIRED = 9,
   DATA_CONFLICT = 10,
   ENML_VALIDATION = 11,
-  SHARD_UNAVAILABLE = 12
+  SHARD_UNAVAILABLE = 12,
+  LEN_TOO_SHORT = 13,
+  LEN_TOO_LONG = 14,
+  TOO_FEW = 15,
+  TOO_MANY = 16,
+  UNSUPPORTED_OPERATION = 17
 }
-
 
 /**
  * This exception is thrown by EDAM procedures when a call fails as a result of 
