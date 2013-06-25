@@ -1,4 +1,10 @@
-# Evernode
+# Evernode (DEPRECATED)
+
+## Check out the [official evernote sdk](https://github.com/evernote/evernote-sdk-js)  
+  
+    
+  
+  
 
 This is an extension to the great work done by wadey on [node-thrift](https://github.com/wadey/node-thrift/).
 This is kinda messy right now, but it will get better. The extension allows users to use the Evernote(TM) Thrift API
